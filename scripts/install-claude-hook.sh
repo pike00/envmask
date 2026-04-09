@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Install envguard as a Claude Code PreToolUse hook
+# Install envmask as a Claude Code PreToolUse hook
 #
 # This script:
-# 1. Installs envguard package globally or in a venv
+# 1. Installs envmask package globally or in a venv
 # 2. Copies the hook script to your Claude Code config directory
 # 3. Updates .claude/settings.json to use the hook
 #
@@ -34,7 +34,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "envguard Claude Code Installation"
+echo "envmask Claude Code Installation"
 echo "=================================="
 echo
 
@@ -48,20 +48,20 @@ echo "Project directory: $PROJECT_DIR"
 echo "Claude config: $CLAUDE_DIR"
 echo
 
-# 1. Install envguard package
-echo "📦 Installing envguard package..."
+# 1. Install envmask package
+echo "📦 Installing envmask package..."
 
 # Get the Python executable path
 PYTHON_BIN=$(python3 -c "import sys; print(sys.executable)" 2>/dev/null) || PYTHON_BIN="python3"
 
 if [[ "$INSTALL_MODE" == "global" ]]; then
-  pip install --upgrade envguard
-  ENVGUARD_HOOK="$PYTHON_BIN -m envguard.hook"
+  pip install --upgrade envmask
+  ENVGUARD_HOOK="$PYTHON_BIN -m envmask.hook"
 else
   pip install -e "$SCRIPT_DIR"
-  ENVGUARD_HOOK="$PYTHON_BIN -m envguard.hook"
+  ENVGUARD_HOOK="$PYTHON_BIN -m envmask.hook"
 fi
-echo "   ✓ envguard installed (using $PYTHON_BIN)"
+echo "   ✓ envmask installed (using $PYTHON_BIN)"
 echo
 
 # 2. Create hooks directory
@@ -71,7 +71,7 @@ echo "   ✓ $HOOKS_DIR created"
 echo
 
 # 3. Copy hook script
-echo "🔗 Linking envguard hook..."
+echo "🔗 Linking envmask hook..."
 # The hook can just use the package directly, no need to copy
 echo "   ✓ Hook ready (uses installed package)"
 echo
@@ -90,7 +90,7 @@ if [[ ! -f "$SETTINGS_FILE" ]]; then
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -m envguard.hook"
+            "command": "python3 -m envmask.hook"
           }
         ]
       }
@@ -100,7 +100,7 @@ if [[ ! -f "$SETTINGS_FILE" ]]; then
 EOF
 else
   # Check if hook already exists
-  if grep -q "envguard.hook" "$SETTINGS_FILE" 2>/dev/null; then
+  if grep -q "envmask.hook" "$SETTINGS_FILE" 2>/dev/null; then
     echo "   ⚠️  Hook already configured in settings.json"
   else
     echo "   Adding PreToolUse hook to existing settings.json..."
@@ -117,7 +117,7 @@ if 'PreToolUse' not in config['hooks']:
     config['hooks']['PreToolUse'] = []
 hook_entry = {
     "matcher": "Read",
-    "hooks": [{"type": "command", "command": "python3 -m envguard.hook"}]
+    "hooks": [{"type": "command", "command": "python3 -m envmask.hook"}]
 }
 if not any(h.get("matcher") == "Read" for h in config['hooks']['PreToolUse']):
     config['hooks']['PreToolUse'].insert(0, hook_entry)
@@ -133,8 +133,8 @@ echo
 echo "✅ Verification"
 echo "==============="
 echo
-$PYTHON_BIN -c "from envguard import mask_value; print('✓ envguard package importable')"
-$PYTHON_BIN -c "import envguard.hook; print('✓ envguard.hook module available')"
+$PYTHON_BIN -c "from envmask import mask_value; print('✓ envmask package importable')"
+$PYTHON_BIN -c "import envmask.hook; print('✓ envmask.hook module available')"
 echo "✓ .claude/settings.json configured"
 echo
 

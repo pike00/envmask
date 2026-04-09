@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "envguard"
+name = "envmask"
 version = "0.1.0"
 description = "Mask secrets in .env files for safe LLM inspection"
 readme = "README.md"
@@ -26,18 +26,18 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/pike00/envguard"
-Repository = "https://github.com/pike00/envguard.git"
-Issues = "https://github.com/pike00/envguard/issues"
-Documentation = "https://github.com/pike00/envguard/blob/main/docs/"
-Roadmap = "https://github.com/pike00/envguard/blob/main/docs/ROADMAP.md"
-Publishing = "https://github.com/pike00/envguard/blob/main/docs/PUBLISHING.md"
+Homepage = "https://github.com/pike00/envmask"
+Repository = "https://github.com/pike00/envmask.git"
+Issues = "https://github.com/pike00/envmask/issues"
+Documentation = "https://github.com/pike00/envmask/blob/main/docs/"
+Roadmap = "https://github.com/pike00/envmask/blob/main/docs/ROADMAP.md"
+Publishing = "https://github.com/pike00/envmask/blob/main/docs/PUBLISHING.md"
 
 [project.scripts]
-envguard = "envguard.cli:main"
+envmask = "envmask.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/envguard"]
+packages = ["src/envmask"]
 
 
 [project.optional-dependencies]

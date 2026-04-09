@@ -1,10 +1,10 @@
-# envguard Documentation
+# envmask Documentation
 
-Welcome to the envguard documentation! This directory contains all guides and references.
+Welcome to the envmask documentation! This directory contains all guides and references.
 
 ## Core Documentation
 
-- **[SETUP.md](SETUP.md)** — Complete guide to installing and using envguard with Claude Code
+- **[SETUP.md](SETUP.md)** — Complete guide to installing and using envmask with Claude Code
   - Installation instructions (quick start and manual)
   - Usage examples
   - Troubleshooting

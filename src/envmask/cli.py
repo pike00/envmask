@@ -1,4 +1,4 @@
-"""Command-line interface for envguard."""
+"""Command-line interface for envmask."""
 
 import argparse
 import sys
@@ -17,7 +17,7 @@ logger.add(sys.stderr, level="INFO", format="<level>{message}</level>")
 def main():
     """Parse command-line arguments and mask .env file."""
     parser = argparse.ArgumentParser(
-        prog="envguard",
+        prog="envmask",
         description="Mask secrets in .env files for safe LLM inspection",
     )
     parser.add_argument(

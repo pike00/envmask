@@ -1,7 +1,7 @@
 """Claude Code PreToolUse hook for masking .env file reads.
 
 Usage:
-    python3 -m envguard.hook
+    python3 -m envmask.hook
     (reads tool input from stdin, outputs hook response to stdout)
 """
 
@@ -80,8 +80,8 @@ def main() -> None:
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
             "permissionDecisionReason": (
-                f"envguard: secrets masked for LLM safety.\n\n"
-                f"# {filepath} (masked by envguard)\n{masked_content}"
+                f"envmask: secrets masked for LLM safety.\n\n"
+                f"# {filepath} (masked by envmask)\n{masked_content}"
             ),
         }
     }

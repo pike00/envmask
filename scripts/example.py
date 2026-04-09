@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Example: Using envguard as a library.
+"""Example: Using envmask as a library.
 
-This example shows how to use envguard.masker in your own code.
+This example shows how to use envmask.masker in your own code.
 """
 
 from pathlib import Path
 
-from envguard import parse_env_file
+from envmask import parse_env_file
 
 # Parse and print masked env vars
 env_file = Path(".env")

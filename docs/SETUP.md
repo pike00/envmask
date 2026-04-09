@@ -1,8 +1,8 @@
-# envguard Setup Guide
+# envmask Setup Guide
 
 **Purpose:** Protect secrets when using Claude Code with `.env` files.
 
-When Claude Code reads a `.env` file, envguard automatically masks secrets so they never appear in the LLM conversation. This prevents:
+When Claude Code reads a `.env` file, envmask automatically masks secrets so they never appear in the LLM conversation. This prevents:
 - Secrets leaking into conversation transcripts
 - Provider caching of full credentials
 - Accidental copy-paste of credentials into chat
@@ -12,20 +12,20 @@ When Claude Code reads a `.env` file, envguard automatically masks secrets so th
 ### Quick Start
 
 ```bash
-# Install envguard (via PyPI)
-pip install envguard
+# Install envmask (via PyPI)
+pip install envmask
 
 # OR install from source
-git clone https://github.com/pike00/envguard.git
-cd envguard
+git clone https://github.com/pike00/envmask.git
+cd envmask
 pip install .
 
-# Set up Claude Code hook (from envguard directory)
+# Set up Claude Code hook (from envmask directory)
 bash scripts/install-claude-hook.sh --project-dir /path/to/your/project
 ```
 
 The script will:
-1. Install the envguard package
+1. Install the envmask package
 2. Configure `.claude/settings.json` to use the hook
 3. Verify installation
 
@@ -35,7 +35,7 @@ If you prefer to do it manually:
 
 **1. Install the package:**
 ```bash
-pip install envguard
+pip install envmask
 ```
 
 **2. Update `.claude/settings.json`:**
@@ -50,7 +50,7 @@ Add this to your Claude Code project config:
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -m envguard.hook"
+            "command": "python3 -m envmask.hook"
           }
         ]
       }
@@ -77,7 +77,7 @@ Claude can now safely read `.env` files without seeing full secrets.
 
 ## How It Works
 
-1. **PreToolUse Hook:** When Claude Code tries to `Read` a file, envguard intercepts first
+1. **PreToolUse Hook:** When Claude Code tries to `Read` a file, envmask intercepts first
 2. **File Detection:** Checks if the target matches `.env` patterns
 3. **Masking:** Masks each value to first 3 chars + "..."
 4. **Denial:** Denies the raw Read and returns masked content as the denial reason
@@ -104,11 +104,11 @@ This approach is safe because:
 
 ### Mask Pattern
 
-To use a different pattern (e.g., first 5 chars), edit the installed envguard:
+To use a different pattern (e.g., first 5 chars), edit the installed envmask:
 
 ```bash
-pip show envguard  # Find installation path
-# Edit: {install_path}/envguard/masker.py
+pip show envmask  # Find installation path
+# Edit: {install_path}/envmask/masker.py
 # Change: masked = value[:3] + "..."  →  masked = value[:5] + "..."
 ```
 
@@ -135,7 +135,7 @@ Or set a local override in `.claude/settings.json`:
 ### File Patterns
 
 To mask additional formats, modify the hook in your `.claude/settings.json` or file an issue at:
-https://github.com/pike00/envguard/issues
+https://github.com/pike00/envmask/issues
 
 (Future versions will support configuration files.)
 
@@ -144,7 +144,7 @@ https://github.com/pike00/envguard/issues
 **Hook not firing?**
 - Restart Claude Code (settings.json changes require reload)
 - Check that `.claude/settings.json` has valid JSON: `python3 -m json.tool .claude/settings.json`
-- Verify envguard is installed: `python3 -m envguard.hook --version`
+- Verify envmask is installed: `python3 -m envmask.hook --version`
 
 **Seeing raw secrets instead of masked values?**
 - Ensure the hook is in `.claude/settings.json` under `PreToolUse` (not `PostToolUse`)
@@ -152,7 +152,7 @@ https://github.com/pike00/envguard/issues
 - Verify file matches `.env` pattern (not `.env.example`)
 
 **Hook has an error?**
-- Test manually: `echo '{"tool_input":{"file_path":".env"}}' | python3 -m envguard.hook`
+- Test manually: `echo '{"tool_input":{"file_path":".env"}}' | python3 -m envmask.hook`
 - Should output JSON with `hookSpecificOutput` field
 
 ## Security Notes
@@ -169,22 +169,22 @@ See [docs/architecture.md](architecture.md) for detailed threat model.
 
 **Remove the hook:**
 1. Edit `.claude/settings.json`
-2. Delete the PreToolUse hook block for `Read`/`envguard.hook`
+2. Delete the PreToolUse hook block for `Read`/`envmask.hook`
 
 **Uninstall the package:**
 ```bash
-pip uninstall envguard
+pip uninstall envmask
 ```
 
 ## Next Steps
 
 - Read `.env` files normally in Claude Code
 - Try asking Claude to review or modify your configuration
-- Report issues: https://github.com/pike00/envguard/issues
+- Report issues: https://github.com/pike00/envmask/issues
 
 ## Global Installation (All Projects)
 
-To use envguard across all Claude Code projects, update your global `.claude/settings.json`:
+To use envmask across all Claude Code projects, update your global `.claude/settings.json`:
 
 ```bash
 # Edit ~/.claude/settings.json (or create it)

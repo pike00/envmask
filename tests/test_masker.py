@@ -1,11 +1,11 @@
-"""Tests for envguard.masker module."""
+"""Tests for envmask.masker module."""
 
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from envguard.masker import mask_value, parse_env_file
+from envmask.masker import mask_value, parse_env_file
 
 
 class TestMaskValue:

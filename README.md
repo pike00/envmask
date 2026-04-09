@@ -1,6 +1,6 @@
-# envguard
+# envmask
 
-[![PyPI](https://img.shields.io/pypi/v/envguard.svg)](https://pypi.org/project/envguard/)
+[![PyPI](https://img.shields.io/pypi/v/envmask.svg)](https://pypi.org/project/envmask/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Hide secrets from LLMs when reading `.env` files.**
@@ -20,7 +20,7 @@ This is a security risk — credentials could be logged in conversation transcri
 
 ## Solution
 
-envguard masks secrets by showing only the first 3 characters + ellipsis:
+envmask masks secrets by showing only the first 3 characters + ellipsis:
 
 ```
 POSTGRES_PASSWORD=wFw...
@@ -32,14 +32,14 @@ This retains enough information to identify a credential (which service, which k
 ## Installation
 
 ```bash
-pip install envguard
+pip install envmask
 ```
 
 Or install from source:
 
 ```bash
-git clone https://github.com/pike00/envguard.git
-cd envguard
+git clone https://github.com/pike00/envmask.git
+cd envmask
 pip install .
 ```
 
@@ -48,17 +48,17 @@ pip install .
 ### Command Line
 
 ```bash
-envguard .env
-envguard config/.env.production
+envmask .env
+envmask config/.env.production
 ```
 
 ### Claude Code Integration (Primary Use Case)
 
-envguard is designed to protect secrets when using Claude Code. Install the hook once, then claude automatically masks `.env` reads:
+envmask is designed to protect secrets when using Claude Code. Install the hook once, then claude automatically masks `.env` reads:
 
 **Installation:**
 ```bash
-pip install envguard
+pip install envmask
 bash scripts/install-claude-hook.sh --project-dir /path/to/project
 ```
 
@@ -79,7 +79,7 @@ Full secrets remain in your `.env` file (unmodified). The masking happens in-pro
 
 ```python
 from pathlib import Path
-from envguard import parse_env_file
+from envmask import parse_env_file
 
 lines = parse_env_file(Path(".env"))
 for line in lines:
@@ -88,16 +88,16 @@ for line in lines:
 
 ## Security Threat Model
 
-**What envguard protects against:**
+**What envmask protects against:**
 - Secrets appearing in LLM conversation transcripts
 - Provider logging/caching of full secrets
 - Accidental copy-paste of credentials into chat
 - Third-party access to session history
 
-**What envguard does NOT protect against:**
+**What envmask does NOT protect against:**
 - Compromised local machine (if your `.env` is readable, keyloggers/malware can steal it)
 - Compromised LLM account (someone with access to your account can request unmasked files)
-- File permissions (envguard respects existing `chmod` rules)
+- File permissions (envmask respects existing `chmod` rules)
 - Multiline secrets (only processes single-line KEY=VALUE format)
 
 **Threat scenario prevented:**
@@ -113,7 +113,7 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for planned features and version mileston
 
 ### Masking Pattern
 
-Currently fixed at first 3 characters + ellipsis. To customize, edit `src/envguard/masker.py`:
+Currently fixed at first 3 characters + ellipsis. To customize, edit `src/envmask/masker.py`:
 
 ```python
 def mask_value(value: str) -> str:
@@ -122,7 +122,7 @@ def mask_value(value: str) -> str:
 
 ### File Patterns
 
-By default, envguard masks files matching:
+By default, envmask masks files matching:
 - `.env`
 - `*.env` (e.g., `production.env`, `app.env`)
 

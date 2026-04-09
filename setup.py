@@ -1,4 +1,4 @@
-"""Setup configuration for envguard."""
+"""Setup configuration for envmask."""
 
 from setuptools import setup
 

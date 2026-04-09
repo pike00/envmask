@@ -1,6 +1,6 @@
-# Publishing envguard to GitHub and PyPI
+# Publishing envmask to GitHub and PyPI
 
-This document outlines the steps to publish envguard.
+This document outlines the steps to publish envmask.
 
 ## Prerequisites
 
@@ -12,19 +12,19 @@ This document outlines the steps to publish envguard.
 ## Step 1: Initialize Git Repository
 
 ```bash
-cd envguard
+cd envmask
 git init
 git config user.name "Your Name"
 git config user.email "your.email@example.com"
 git add .
-git commit -m "Initial commit: envguard v0.1.0"
+git commit -m "Initial commit: envmask v0.1.0"
 git branch -M main
 ```
 
 ## Step 2: Add GitHub Remote
 
 ```bash
-git remote add origin https://github.com/pike00/envguard.git
+git remote add origin https://github.com/pike00/envmask.git
 git push -u origin main
 ```
 
@@ -36,7 +36,7 @@ git push origin v0.1.0
 ```
 
 Then on GitHub:
-1. Go to https://github.com/pike00/envguard/releases
+1. Go to https://github.com/pike00/envmask/releases
 2. Click "Draft a new release"
 3. Select tag `v0.1.0`
 4. Add release notes from [CHANGELOG.md](../CHANGELOG.md)
@@ -48,7 +48,7 @@ Then on GitHub:
 ### Option A: Manual Upload (with uv)
 
 ```bash
-uv build  # Creates dist/envguard-0.1.0-py3-none-any.whl and dist/envguard-0.1.0.tar.gz
+uv build  # Creates dist/envmask-0.1.0-py3-none-any.whl and dist/envmask-0.1.0.tar.gz
 uv pip install twine
 uv run twine upload dist/*
 # Enter PyPI username and password when prompted
@@ -94,8 +94,8 @@ Then:
 After publishing to PyPI:
 
 ```bash
-pip install envguard
-envguard --version
+pip install envmask
+envmask --version
 ```
 
 ## Future Updates
@@ -113,5 +113,5 @@ To release a new version (e.g., v0.2.0):
 
 - First release to PyPI may take 5-10 minutes to appear
 - Subsequent releases cache for ~5 minutes
-- You can view package stats at https://pypi.org/project/envguard/
-- Yank old versions if needed: https://pypi.org/project/envguard/#history
+- You can view package stats at https://pypi.org/project/envmask/
+- Yank old versions if needed: https://pypi.org/project/envmask/#history
