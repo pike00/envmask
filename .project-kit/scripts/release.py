@@ -37,7 +37,7 @@ INSTALL_COMMAND = "uv tool install drape=={version}"
 # `just version` prod-version resolution (baked from .project-kit answers).
 PROD_SOURCE = "none"
 PROD_HOMELAB_ENV = ""
-BAKED_LITELLM_BASE_URL: str | None = None
+BAKED_LITELLM_BASE_URL: HttpUrl | None = None
 
 
 class Settings(BaseSettings):
@@ -140,8 +140,8 @@ SETTINGS = Settings()
 app = typer.Typer(add_completion=False)
 
 
-def _run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
-    return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw)
+def _run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(cmd, check=True, capture_output=True, text=True)
 
 
 def _current_branch() -> str:
