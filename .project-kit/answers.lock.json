@@ -31,7 +31,9 @@
     "custom_command": null,
     "enabled": false,
     "homelab_app": null,
+    "host": null,
     "pypi_package": null,
+    "ssh_alias": null,
     "target": "none"
   },
   "docs": {
@@ -44,6 +46,9 @@
     "source_dir": "docs"
   },
   "domain": "",
+  "execution": {
+    "targets": {}
+  },
   "language": "python",
   "managed_subsystems": [
     "release"
@@ -62,14 +67,15 @@
   },
   "project_name": "drape",
   "public": true,
-  "refreshed_at": "2026-06-27",
+  "refreshed_at": "2026-08-04",
   "release": {
     "enabled": true,
     "install_command": "uv tool install drape=={version}",
     "litellm_base_url": "",
     "litellm_model": "deepseek-v4-pro-cloud",
     "prod_homelab_env": "",
-    "prod_source": "none"
+    "prod_pypi_package": "drape",
+    "prod_source": "pypi"
   },
   "setup": {
     "backend": null,
@@ -78,7 +84,7 @@
     "hooks": true,
     "precommit": false
   },
-  "skill_version": "0.1.0",
+  "skill_version": "0.2.0",
   "test": {
     "backend": {
       "cmd": null,

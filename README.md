@@ -302,25 +302,31 @@ The walker checks only the **last segment** of the path, not parent segments. `a
 ## Release
 
 ```bash
+just context                # mandatory before previewing a release
+just release-dry patch      # show the next version and planned actions without writes
+
+just context                # mandatory before cutting a release
 just release patch          # patch | minor | major
 ```
 
-This runs [release-kit](https://github.com/pike00/release-kit) `cut`, which:
-1. Preflights (clean tree on `main`, in sync with `origin`).
+The managed project-kit release command:
+
+1. Preflights a clean tree on `main` and verifies the git-cliff configuration.
 2. Updates `CHANGELOG.md` via `git-cliff` (mechanical, commits → grouped sections per `cliff.toml`).
 3. Drafts the GitHub release body via LiteLLM (`deepseek-v4-pro-cloud`) and opens it in `$EDITOR`.
 4. Commits `CHANGELOG.md`, tags the commit, pushes, and runs `gh release create`.
 
-Pushing the `v*.*.*` tag triggers `.github/workflows/release.yml`, which is the only GitHub Actions workflow drape keeps: it builds the sdist + wheel and publishes to PyPI via OIDC trusted publishing (no API token in source). The PyPI page typically updates within a minute.
+Pushing the `v*.*.*` tag triggers `.github/workflows/release.yml`, which builds the sdist and wheel and publishes to PyPI via OIDC trusted publishing (no API token in source). The repository also keeps its Codacy analysis workflow. The PyPI page typically updates within a minute.
 
-Preview what will land without releasing:
+Supporting commands:
 
 ```bash
-just changelog-preview      # what git-cliff will write into CHANGELOG.md
-just notes-dry-run          # what the LLM will draft for the GH release body
+just changelog              # regenerate CHANGELOG.md from git history
+just notes v0.3.3           # draft notes for an existing tag to stdout
+just version                # compare the latest local tag with the PyPI version
 ```
 
-`CHANGELOG.md` is generated; do not hand-edit it. To regenerate from full history (e.g. after editing `cliff.toml`), run `just changelog-backfill`.
+`CHANGELOG.md` is generated; do not hand-edit it.
 
 ## Development
 
