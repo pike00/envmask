@@ -302,8 +302,10 @@ The walker checks only the **last segment** of the path, not parent segments. `a
 ## Release
 
 ```bash
-just context
+just context                # mandatory before previewing a release
 just release-dry patch      # show the next version and planned actions without writes
+
+just context                # mandatory before cutting a release
 just release patch          # patch | minor | major
 ```
 

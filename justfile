@@ -25,7 +25,7 @@ fmt:
     uv run black .
 
 # Cut a release. Build and PyPI publish happen automatically via GitHub Actions
-# OIDC after the tag push (release.yml). Alias: `just tag LEVEL`.
+# OIDC after the tag push (release.yml).
 ship level:
     @just release {{level}}
 
