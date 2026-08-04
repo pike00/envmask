@@ -3,17 +3,22 @@
 # Last refreshed: 2026-08-04
 
 release LEVEL="patch":
+    @just context
     @uv run .project-kit/scripts/release.py cut {{LEVEL}}
 
 release-dry LEVEL="patch":
+    @just context
     @uv run .project-kit/scripts/release.py cut {{LEVEL}} --dry-run
 
 changelog:
+    @just context
     @uvx git-cliff@latest --config .project-kit/cliff.toml --output CHANGELOG.md
 
 notes TAG:
+    @just context
     @uv run .project-kit/scripts/release.py notes --tag {{TAG}}
 
 # Print local latest tag + deployed prod version (resolved per prod_source).
 version:
+    @just context
     @uv run .project-kit/scripts/release.py version
