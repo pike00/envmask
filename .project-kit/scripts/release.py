@@ -139,12 +139,34 @@ class Settings(BaseSettings):
     def editor_argv(self) -> list[str]:
         return shlex.split(self.editor)
 
+    def _homelab_env_text(self, env_path: Path) -> str:
+        try:
+            if not env_path.name.endswith(".sops"):
+                return env_path.read_text()
+            secrets_cli = self.home / "Documents" / "Homelab" / "infra" / "scripts" / "secrets"
+            if not secrets_cli.is_file():
+                raise ValueError(f"Homelab secrets helper not found: {secrets_cli}")
+            return subprocess.run(
+                [str(secrets_cli), "sopsx", str(env_path), "-d"],
+                capture_output=True,
+                check=True,
+                text=True,
+                timeout=10,
+            ).stdout
+        except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            raise ValueError(f"unable to read Homelab env file: {env_path}") from None
+
     def homelab_image_tag(self, relative_env: str) -> tuple[Path, bool, str | None]:
         """Read IMAGE_TAG from the configured HOME-relative homelab env file."""
-        env_path = self.home / "Documents" / "Homelab" / relative_env
+        try:
+            homelab_root = (self.home / "Documents" / "Homelab").resolve()
+            env_path = (homelab_root / relative_env).resolve()
+            env_path.relative_to(homelab_root)
+        except (OSError, RuntimeError, ValueError):
+            raise ValueError("Homelab env path must stay within the Homelab repository") from None
         if not env_path.is_file():
             return env_path, False, None
-        for raw in env_path.read_text().splitlines():
+        for raw in self._homelab_env_text(env_path).splitlines():
             line = raw.strip()
             if line.startswith("IMAGE_TAG="):
                 value = line.split("=", 1)[1].strip().strip('"').strip("'")
@@ -193,12 +215,12 @@ def _next_version(level: str) -> str:
     return f"v{major}.{minor}.{patch + 1}"
 
 
-def _draft_notes(version: str, prev_tag: str | None) -> str:
+def _draft_notes(version: str, prev_tag: str | None, end_ref: str) -> str:
     """Draft release notes via the configured LLM endpoint. Empty on failure."""
     base_url = str(SETTINGS.litellm_base_url or "").rstrip("/")
     api_key = SETTINGS.llm_api_key
     try:
-        rng = f"{prev_tag}..HEAD" if prev_tag else "HEAD"
+        rng = f"{prev_tag}..{end_ref}" if prev_tag else end_ref
         commits = _run(["git", "log", rng, "--pretty=format:- %h %s"]).stdout
         prompt = (
             f"Draft a short, editorial GitHub release narrative for {PROJECT_NAME} {version}.\n"
@@ -266,7 +288,7 @@ def cut(
         ]
     )
     typer.echo("[4/7] drafting release notes via LiteLLM…")
-    notes = _draft_notes(version, _latest_tag())
+    notes = _draft_notes(version, _latest_tag(), "HEAD")
     typer.echo("[5/7] opening $EDITOR for review…")
     with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
         f.write(notes)
@@ -291,16 +313,20 @@ def cut(
 def version() -> None:
     """Print the local latest tag and the deployed prod version (per prod_source)."""
     typer.echo(f"local:  {_latest_tag() or '(none)'}")
-    if PROD_SOURCE == "homelab" and PROD_HOMELAB_ENV:
-        env_path, exists, image_tag = SETTINGS.homelab_image_tag(PROD_HOMELAB_ENV)
+    if PROD_SOURCE == "homelab":
+        try:
+            env_path, exists, image_tag = SETTINGS.homelab_image_tag(PROD_HOMELAB_ENV)
+        except ValueError as exc:
+            typer.echo(f"prod:   ({exc})", err=True)
+            raise typer.Exit(code=1) from exc
         label = f"~/Documents/Homelab/{PROD_HOMELAB_ENV} IMAGE_TAG"
         if not exists:
-            typer.echo(f"prod:   (file not found: {env_path})   [{label}]")
-            return
-        if image_tag is None:
-            typer.echo(f"prod:   (IMAGE_TAG not set)   [{label}]")
-            return
-        typer.echo(f"prod:   {image_tag or '(empty)'}   [{label}]")
+            typer.echo(f"prod:   (file not found: {env_path})   [{label}]", err=True)
+            raise typer.Exit(code=1)
+        if image_tag is None or not image_tag.strip():
+            typer.echo(f"prod:   (IMAGE_TAG not set)   [{label}]", err=True)
+            raise typer.Exit(code=1)
+        typer.echo(f"prod:   {image_tag}   [{label}]")
     elif PROD_SOURCE == "pypi":
         try:
             response = httpx.get(
@@ -318,8 +344,10 @@ def version() -> None:
         typer.echo("prod:   (not configured — prod_source = none)")
     else:
         typer.echo(
-            f"prod:   (prod_source={PROD_SOURCE!r} " "not supported by this generated release.py)"
+            f"prod:   (prod_source={PROD_SOURCE!r} " "not supported by this generated release.py)",
+            err=True,
         )
+        raise typer.Exit(code=1)
 
 
 @app.command()
@@ -331,7 +359,7 @@ def notes(tag: str = typer.Option(..., "--tag")) -> None:
         ).stdout.strip()
         or None
     )
-    content = _draft_notes(tag, prev)
+    content = _draft_notes(tag, prev, tag)
     sys.stdout.write(content)
 
 
