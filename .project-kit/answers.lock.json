@@ -74,7 +74,8 @@
     "litellm_base_url": "",
     "litellm_model": "deepseek-v4-pro-cloud",
     "prod_homelab_env": "",
-    "prod_source": "none"
+    "prod_pypi_package": "drape",
+    "prod_source": "pypi"
   },
   "setup": {
     "backend": null,

@@ -26,7 +26,15 @@ from pathlib import Path
 
 import httpx
 import typer
-from pydantic import Field, HttpUrl, SecretStr, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    HttpUrl,
+    SecretStr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_NAME = "drape"
@@ -35,9 +43,18 @@ BRANCH = "main"
 LITELLM_MODEL = "deepseek-v4-pro-cloud"
 INSTALL_COMMAND = "uv tool install drape=={version}"
 # `just version` prod-version resolution (baked from .project-kit answers).
-PROD_SOURCE = "none"
+PROD_SOURCE = "pypi"
 PROD_HOMELAB_ENV = ""
+PROD_PYPI_PACKAGE = "drape"
 BAKED_LITELLM_BASE_URL: HttpUrl | None = None
+
+
+class PyPIInfo(BaseModel):
+    version: str = Field(min_length=1)
+
+
+class PyPIProject(BaseModel):
+    info: PyPIInfo
 
 
 class Settings(BaseSettings):
@@ -142,6 +159,10 @@ app = typer.Typer(add_completion=False)
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, check=True, capture_output=True, text=True)
+
+
+def _github_release_url(version: str) -> str:
+    return _run(["gh", "release", "view", version, "--json", "url", "-q", ".url"]).stdout.strip()
 
 
 def _current_branch() -> str:
@@ -262,7 +283,8 @@ def cut(
     if draft:
         cmd.append("--draft")
     _run(cmd)
-    typer.echo(f"done. URL: $(gh release view {version} --json url -q .url)")
+    release_url = _github_release_url(version)
+    typer.echo(f"done. URL: {release_url}")
 
 
 @app.command()
@@ -279,6 +301,19 @@ def version() -> None:
             typer.echo(f"prod:   (IMAGE_TAG not set)   [{label}]")
             return
         typer.echo(f"prod:   {image_tag or '(empty)'}   [{label}]")
+    elif PROD_SOURCE == "pypi":
+        try:
+            response = httpx.get(
+                f"https://pypi.org/pypi/{PROD_PYPI_PACKAGE}/json",
+                headers={"Accept": "application/json"},
+                timeout=10,
+            )
+            response.raise_for_status()
+            deployed = PyPIProject.model_validate(response.json()).info.version
+        except (httpx.HTTPError, json.JSONDecodeError, ValidationError) as exc:
+            typer.echo(f"prod:   (PyPI lookup failed for {PROD_PYPI_PACKAGE}: {exc})", err=True)
+            raise typer.Exit(code=1) from exc
+        typer.echo(f"prod:   {deployed}   [PyPI {PROD_PYPI_PACKAGE}]")
     elif PROD_SOURCE == "none":
         typer.echo("prod:   (not configured — prod_source = none)")
     else:
